@@ -20,12 +20,15 @@ import 'package:flutter/material.dart';
 class SkeletonPainter extends CustomPainter {
 
   final List<dynamic> results;
-  SkeletonPainter(this.results);
+  final double factor;
+
+  SkeletonPainter(this.results,{ this.factor = 1});
 
 
   final paintBone = Paint()
     ..color = Colors.blue
     ..strokeWidth = 3.0;
+
 
 
   drawSkeleton(dynamic data,Canvas canvas, Size size) {
@@ -49,11 +52,11 @@ class SkeletonPainter extends CustomPainter {
     var obj1 = keypoints.where((map) => map['part'].toString() == key1).single;
     var obj2 = keypoints.where((map) => map['part'].toString() == key2).single;
 
-    var _x1 = obj1["x"] * size.width;
-    var _y1 = obj1["y"] * size.height;
+    var _x1 = obj1["x"] * size.width *factor;
+    var _y1 = obj1["y"] * size.height *factor;
 
-    var _x2 = obj2["x"] * size.width;
-    var _y2 = obj2["y"] * size.height;
+    var _x2 = obj2["x"] * size.width *factor;
+    var _y2 = obj2["y"] * size.height *factor;
 
     canvas.drawLine(Offset(_x1, _y1), Offset(_x2, _y2), paintBone);
   }
@@ -76,8 +79,8 @@ class SkeletonPainter extends CustomPainter {
         //get part
         if(point["score"] < 0.3) continue; //filter bad results
 
-        var _x = point["x"] * size.width;
-        var _y = point["y"] * size.height;
+        var _x = (point["x"] * size.width) *factor;
+        var _y = (point["y"] * size.height) * factor;
         canvas.drawCircle(Offset(_x, _y), 5, paintJoint);
 
         print("Paint $_x $_y");

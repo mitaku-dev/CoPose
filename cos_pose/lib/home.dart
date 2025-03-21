@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pose_tool/CameraManager.dart';
 import 'package:pose_tool/SkeletonPainter.dart';
 import 'package:tflite_v2/tflite_v2.dart';
+import 'package:vector_math/vector_math.dart' as vec;
 
 //import 'package:flutter_native_splash/flutter_native_splash.dart';
 
@@ -56,6 +57,30 @@ class _HomeState extends State<Home> {
   }
 
 
+  double getNormalizeFactor() {
+    if(_recognitions.isEmpty ) return 1;
+
+    var rightShoulder = _recognitions[0]["keypoints"].values.where((map) => map['part'].toString() == "rightShoulder").single;
+    var leftShoulder = _recognitions[0]["keypoints"].values.where((map) => map['part'].toString() == "leftShoulder").single;
+
+    var rsv = vec.Vector2(rightShoulder["x"], rightShoulder["y"]);
+    var lsv =  vec.Vector2(leftShoulder["x"], leftShoulder["y"]);
+
+    var actual = rsv.distanceTo(lsv);
+
+    var rightShoulderRef = widget.reference[0]["keypoints"].values.where((map) => map['part'].toString() == "rightShoulder").single;
+    var leftShoulderRef = widget.reference[0]["keypoints"].values.where((map) => map['part'].toString() == "leftShoulder").single;
+
+    var rsvRef = vec.Vector2(rightShoulderRef["x"], rightShoulderRef["y"]);
+    var lsvRef =  vec.Vector2(leftShoulderRef["x"], leftShoulderRef["y"]);
+
+    var reference = rsvRef.distanceTo(lsvRef);
+
+    return (actual / reference);
+
+  }
+
+
   @override
   void dispose() async {
     super.dispose();
@@ -78,7 +103,7 @@ class _HomeState extends State<Home> {
             height:screen.height, //TODO scale real size absed on picture
             width: screen.width,
             child: CustomPaint(
-              painter: SkeletonPainter(widget.reference),
+              painter: SkeletonPainter(widget.reference, factor: getNormalizeFactor()),
             )
           ),
           BndBox(
