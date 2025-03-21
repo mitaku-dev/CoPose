@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pose_tool/home.dart';
+import 'package:pose_tool/pages/SkeletonUtils.dart';
 import 'package:tflite_v2/tflite_v2.dart';
+import 'package:vector_math/vector_math.dart' as vec;
 
 import '../SkeletonPainter.dart';
 import '../bnd_box.dart';
@@ -28,6 +30,8 @@ class _SelectReferencePageState extends State<SelectReferencePage> {
   List<dynamic> _recognitions = [];
   double height = 0;
   double width = 0;
+
+  bool accepted = false;
 
   // final double MAX_WIDTH = 600;
   // final double MAX_HEIGHT = 600;
@@ -71,7 +75,7 @@ class _SelectReferencePageState extends State<SelectReferencePage> {
 
      Tflite.runPoseNetOnImage(
      path: file!.path,
-     numResults: 2,
+     numResults: 1, //TODO is this how many persons are detected?
      threshold: 0.7,
      nmsRadius: 10,
      asynch: true
@@ -83,6 +87,21 @@ class _SelectReferencePageState extends State<SelectReferencePage> {
      //TODO
      //  }
      _recognitions = recognitions!;
+
+     //CHeck if every needed point is there
+     try {
+       vec.Vector2 rightShoulder = SkeletonUtils.getVectorFromKeypoint(_recognitions, "rightShoulder");
+       vec.Vector2 leftShoulder = SkeletonUtils.getVectorFromKeypoint(_recognitions, "leftShoulder");
+       vec.Vector2 rightHip = SkeletonUtils.getVectorFromKeypoint(_recognitions, "rightHip");
+       vec.Vector2 leftHip = SkeletonUtils.getVectorFromKeypoint(_recognitions, "leftHip");
+
+       accepted = true;
+     } on StateError {
+       print("Not valid");
+       accepted = false;
+     }
+
+
      });
 
      });
@@ -132,10 +151,18 @@ class _SelectReferencePageState extends State<SelectReferencePage> {
                     ),
                     ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Home(_recognitions))
-                          );
+
+                          if(accepted) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => Home(_recognitions))
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("This Picture is not a valid reference"))
+                            );
+                          }
+
 
                         },
                         child: Text("Continue")
