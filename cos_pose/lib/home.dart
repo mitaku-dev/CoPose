@@ -1,5 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:pose_tool/CameraManager.dart';
+import 'package:pose_tool/SkeletonPainter.dart';
 import 'package:tflite_v2/tflite_v2.dart';
 
 //import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -10,9 +12,11 @@ import 'camera.dart';
 import 'dart:math' as math;
 
 class Home extends StatefulWidget {
-  final List<CameraDescription> cameras;
+  //final List<CameraDescription> cameras;
+  Home(this.reference);
+  //Home(this.cameras);
 
-  Home(this.cameras);
+  final List<dynamic> reference;
 
   @override
   _HomeState createState() => _HomeState();
@@ -25,10 +29,11 @@ class _HomeState extends State<Home> {
   int _imageWidth = 0;
   CameraController? controller;
 
+
   @override
   void initState() {
     super.initState();
-    controller = new CameraController(widget.cameras[0], ResolutionPreset.high);
+    controller = new CameraController(CameraManager().cameras[0], ResolutionPreset.high);
    // loadModel();
   }
 
@@ -65,9 +70,16 @@ class _HomeState extends State<Home> {
       body: Stack(
         children: [
           Camera(
-            widget.cameras,
+            CameraManager().cameras,
             controller,
             setRecognitions,
+          ),
+          Container(
+            height:screen.height, //TODO scale real size absed on picture
+            width: screen.width,
+            child: CustomPaint(
+              painter: SkeletonPainter(widget.reference),
+            )
           ),
           BndBox(
               _recognitions == null ? [] : _recognitions,
@@ -87,10 +99,10 @@ class _HomeState extends State<Home> {
               final lensDirection =  controller!.description.lensDirection;
               CameraDescription newDescription;
               if(lensDirection == CameraLensDirection.front){
-                newDescription = widget.cameras.firstWhere((description) => description.lensDirection == CameraLensDirection.back);
+                newDescription = CameraManager().cameras.firstWhere((description) => description.lensDirection == CameraLensDirection.back);
               }
               else{
-                newDescription = widget.cameras.firstWhere((description) => description.lensDirection == CameraLensDirection.front);
+                newDescription = CameraManager().cameras.firstWhere((description) => description.lensDirection == CameraLensDirection.front);
               }
               setState(() {
                 controller!.setDescription(newDescription);

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:pose_tool/pages/select_reference_page.dart';
 //import 'package:flutter_native_splash/flutter_native_splash.dart';
 
+import 'CameraManager.dart';
 import 'home.dart';
 import 'package:tflite_v2/tflite_v2.dart';
 
@@ -15,11 +16,7 @@ List<CameraDescription> cameras = [];
 Future<Null> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
  // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  try {
-    cameras = await availableCameras();
-  } on CameraException catch (e) {
-    print('Error: $e.code\nError Message: $e.message');
-  }
+  await CameraManager().init();
   loadModel();
   runApp(MyApp());
 }
