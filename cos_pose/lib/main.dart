@@ -1,8 +1,12 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:pose_tool/pages/select_reference_page.dart';
 //import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'home.dart';
+import 'package:tflite_v2/tflite_v2.dart';
+
 
 
 
@@ -16,9 +20,24 @@ Future<Null> main() async {
   } on CameraException catch (e) {
     print('Error: $e.code\nError Message: $e.message');
   }
+  loadModel();
   runApp(MyApp());
 }
 
+loadModel() async {
+  Tflite.close();
+  try {
+    String? res = await Tflite.loadModel(
+        model: "assets/posenet_mv1_075_float_from_checkpoints.tflite"
+    );
+    print(res);
+  } on PlatformException {
+    print("Failed to load model");
+  }
+
+
+  // FlutterNativeSplash.remove();
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -28,7 +47,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
       ),
-      home: Home(cameras),
+      home: SelectReferencePage()//Home(cameras),
     );
   }
 }

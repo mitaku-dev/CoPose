@@ -1,6 +1,6 @@
 {
-    "name": "cos_pose",
-    "short_name": "cos_pose",
+    "name": "pose_tool",
+    "short_name": "pose_tool",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

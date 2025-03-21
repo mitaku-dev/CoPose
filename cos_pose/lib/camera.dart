@@ -10,8 +10,9 @@ class Camera extends StatefulWidget {
 
   final List<CameraDescription> cameras;
   final Callback setRecognitions;
+  CameraController? controller;
 
-  Camera(this.cameras, this.setRecognitions);
+  Camera(this.cameras, this.controller, this.setRecognitions);
 
   @override
   _CameraState createState() => _CameraState();
@@ -20,23 +21,19 @@ class Camera extends StatefulWidget {
 
 class _CameraState extends State<Camera> {
 
-CameraController? controller;
+
 bool isDetecting = false;
 
-@override
-void initState() {
-  super.initState();
 
-  if (widget.cameras == null || widget.cameras.length < 1) {
-    print('No Camera is found');
-  } else {
-    controller = new CameraController(widget.cameras[0], ResolutionPreset.high);
-    controller?.initialize().then((_) {
-      if (!mounted) return;
-      setState(() {});
+detect() {
 
-      controller?.startImageStream((image) {
-        if (!isDetecting) isDetecting = true;
+  widget.controller?.initialize().then((_) {
+    if (!mounted) return;
+    setState(() {});
+
+    widget.controller?.startImageStream((image) {
+      if (!isDetecting) {
+        isDetecting = true;
         int startTime = new DateTime.now().millisecondsSinceEpoch;
 
         //poseNet
@@ -55,20 +52,32 @@ void initState() {
 
           isDetecting = false;
         });
-      });
+      }
     });
+  });
+}
+
+@override
+void initState() {
+  super.initState();
+
+  if (widget.cameras == null || widget.cameras.length < 1) {
+    print('No Camera is found');
+  } else {
+    detect();
   }
 }
 
   @override
   void dispose() {
-    controller?.dispose();
+    widget.controller?.dispose();
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
-    if (controller == null || !controller!.value.isInitialized) {
+    if (widget.controller == null || !widget.controller!.value.isInitialized) {
       return Container();
     }
 
@@ -76,7 +85,7 @@ void initState() {
 
     var screenH = math.max(tmp.height, tmp.width);
     var screenW = math.min(tmp.height, tmp.width);
-    tmp = controller!.value.previewSize!;
+    tmp = widget.controller!.value.previewSize!;
     var previewH = math.max(tmp.height, tmp.width);
     var previewW = math.min(tmp.height, tmp.width);
     var screenRatio = screenH / screenW;
@@ -87,7 +96,7 @@ void initState() {
       screenRatio > previewRatio ? screenH : screenW / previewW * previewH,
       maxWidth:
       screenRatio > previewRatio ? screenH / previewH * previewW : screenW,
-      child: CameraPreview(controller!),
+      child: CameraPreview(widget.controller!),
     );
   }
 
