@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pose_tool/pages/SkeletonUtils.dart';
+import 'package:vector_math/vector_math.dart' as vec;
 
 
 /**
@@ -21,8 +23,10 @@ class SkeletonPainter extends CustomPainter {
 
   final List<dynamic> results;
   final double factor;
+  final double translatex;
+  final double translatey;
 
-  SkeletonPainter(this.results,{ this.factor = 1});
+  SkeletonPainter(this.results,{ this.factor = 1, this.translatex = 0, this.translatey = 0});
 
 
   final paintBone = Paint()
@@ -52,11 +56,11 @@ class SkeletonPainter extends CustomPainter {
     var obj1 = keypoints.where((map) => map['part'].toString() == key1).single;
     var obj2 = keypoints.where((map) => map['part'].toString() == key2).single;
 
-    var _x1 = obj1["x"] * size.width *factor;
-    var _y1 = obj1["y"] * size.height *factor;
+    var _x1 = (obj1["x"]+translatex) * size.width *factor;
+    var _y1 = (obj1["y"]+translatey) * size.height *factor;
 
-    var _x2 = obj2["x"] * size.width *factor;
-    var _y2 = obj2["y"] * size.height *factor;
+    var _x2 = (obj2["x"]+translatex) * size.width *factor;
+    var _y2 = (obj2["y"]+translatey) * size.height *factor;
 
     canvas.drawLine(Offset(_x1, _y1), Offset(_x2, _y2), paintBone);
   }
@@ -75,15 +79,13 @@ class SkeletonPainter extends CustomPainter {
       var list = re["keypoints"].values;
       for(var point in list) {
 
-        print(point["part"]);
         //get part
         if(point["score"] < 0.3) continue; //filter bad results
 
-        var _x = (point["x"] * size.width) *factor;
-        var _y = (point["y"] * size.height) * factor;
+        var _x = (point["x"]+translatex) * size.width *factor;
+        var _y = (point["y"]+translatey) * size.height * factor;
         canvas.drawCircle(Offset(_x, _y), 5, paintJoint);
 
-        print("Paint $_x $_y");
       }
 
       /*
@@ -97,6 +99,9 @@ class SkeletonPainter extends CustomPainter {
         // canvas.drawLine(Offset(_x, _y), Offset(p2.x, p2.y), paintBone);
       }); */
     });
+
+   // SkeletonUtils.calculateMiddlePoint(values)
+    //canvas.drawCircle(Offset(_x, _y), 5, paintJoint);
   }
 
 
