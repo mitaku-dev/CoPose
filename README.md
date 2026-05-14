@@ -42,7 +42,7 @@ This project is a personal learning playground. It is not under active developme
 - Android Studio / Xcode (for emulator) or physical device
 - A physical device is recommended for camera features
 
-**Notice that CosPose won't run on Web due to the need of PoseNet**
+**Notice that CoPose won't run on Web due to the need of PoseNet**
 
 ### Installation
 
